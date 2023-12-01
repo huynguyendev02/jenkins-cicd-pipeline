@@ -1,0 +1,7 @@
+dependencies: 
+  - fontconfig
+  - openjdk-17-jre  
+  - jenkins
+jenkins_key: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+jenkins_signed_file: /usr/share/keyrings/jenkins-keyring.asc
+jenkins_version: https://pkg.jenkins.io/debian-stable

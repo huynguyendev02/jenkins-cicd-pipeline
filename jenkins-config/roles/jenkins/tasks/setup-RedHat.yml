@@ -1,0 +1,36 @@
+- name: Get Jenkins repo (RedHat)
+  ansible.builtin.get_url:
+      url: '{{ jenkins_repo_url }}'
+      dest: /etc/yum.repos.d/jenkins.repo
+
+- name: Import rpm key from Jenkins.io
+  ansible.builtin.rpm_key:
+    state: present
+    key: '{{ jenkins_key }}'
+
+
+- name: Update  yum packages
+  yum:
+    update_cache: true
+
+- name: Download jdk-17 (For Jenkins)
+  ansible.builtin.get_url:
+      url: '{{ jdk_rpm }}'
+      dest: '/opt/{{ jdk_name }}'
+- name: Install jdk-17 (For Jenkins)
+  package:
+    name: '/opt/{{ jdk_name }}'
+    state: present 
+    disable_gpg_check: true
+
+- name: Open port 8080 for Jenkins in firewalld
+  firewalld:
+    port: '8080/tcp'
+    immediate: yes
+    permanent: true
+    state: enabled
+    zone: public
+- name: Reload firewalld
+  service:
+    name: firewalld
+    state: restarted

@@ -1,0 +1,8 @@
+dependencies: 
+  - fontconfig
+  - dejavu-sans-fonts
+  - jenkins
+jenkins_repo_url: https://pkg.jenkins.io/redhat/jenkins.repo
+jenkins_key: https://pkg.jenkins.io/redhat/jenkins.io-2023.key
+jdk_rpm: https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.rpm
+jdk_name: jdk-17_linux-x64_bin.rpm

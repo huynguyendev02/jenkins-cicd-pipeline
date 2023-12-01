@@ -1,0 +1,37 @@
+---
+# tasks file for docker
+# code: language=ansible
+- name: Curl Docker
+  get_url:
+    url: https://get.docker.com
+    dest: /opt/install-docker.sh
+    mode: "0777"
+- name: Install Docker
+  command: 
+    chdir: /opt
+    cmd: ./install-docker.sh 
+   
+- name: "Add user {{ user }} to Docker group"
+  user:
+    name: "{{ user }}"
+    groups: docker
+    append: yes
+- name: Config HTTP Request for Docker
+  ansible.builtin.template:
+    src: daemon.json.j2
+    dest: "/etc/docker/daemon.json"
+    owner: root
+    group: root
+    mode: '0644'
+- name: Start And Enable Docker
+  service:
+    name: docker
+    state: started
+    enabled: true
+- name: Reset ssh connection to allow user changes to affect ansible user
+  meta: reset_connection
+- name: Test Docker
+  command: docker ps
+  register: result
+- debug:
+    var: result.stdout_lines

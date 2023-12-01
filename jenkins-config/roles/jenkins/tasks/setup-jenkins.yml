@@ -1,0 +1,56 @@
+
+- name: Install fontconfig and jenkins
+  package:
+    name: '{{ item }}'
+    state: present
+  with_items: '{{ dependencies }}'
+  notify: Restart Jenkins
+
+- name: Daemon reload
+  systemd:
+    daemon_reload: true
+- name: Remove Auth for Jenkins
+  shell: ex +g/useSecurity/d +g/authorizationStrategy/d -scwq /var/lib/jenkins/config.xml
+- name: Start and Enable jenkins
+  service:
+    name: jenkins
+    state: restarted
+    enabled: true 
+- name: Log of Jenkins
+  command: journalctl -u jenkins
+  register: jenkinsLog
+- debug:
+    msg: '{{ jenkinsLog }}'
+- name: Wait untils Jenkins web API is available
+  shell: curl --head --silent http://localhost:8080/cli/
+  register: result
+  until: result.stdout.find("200") != -1
+  retries: 20
+  delay: 5
+
+- name: Download CLI jar
+  get_url:
+    url: "{{ jenkins_cli_url }}"
+    dest: /opt/jenkins-cli.jar
+
+- name: Install plugin
+  shell: java -jar /opt/jenkins-cli.jar -s http://localhost:8080/ install-plugin '{{ item }}'
+  with_items: '{{ jenkins_plugins }}'
+
+- name: Restart Jenkins
+  service:
+    name: jenkins
+    state: restarted
+
+- name: Configuration as Code for Jenkins
+  template: 
+    src: jenkins.yaml
+    dest: '{{ JENKINS_HOME }}/jenkins.yaml'
+
+
+- name: Restart Jenkins
+  service:
+    name: jenkins
+    state: restarted
+
+

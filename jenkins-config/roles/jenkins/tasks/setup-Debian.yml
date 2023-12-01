@@ -1,0 +1,24 @@
+- name: Get Jenkins repo (Ubuntu)
+  ansible.builtin.get_url:
+    url: '{{ jenkins_key }}'
+    dest: /usr/share/keyrings/jenkins-keyring.asc
+
+
+- name: Add Jenkins package repository source
+  ansible.builtin.apt_repository:
+    filename: jenkins.list
+    repo: "deb [signed-by={{ jenkins_signed_file }}] {{ jenkins_version }} binary/"
+    update_cache: yes
+
+
+
+
+- name: Allow all access to tcp port 8080 (Ubuntu)
+  community.general.ufw:
+    rule: allow
+    port: '8080'
+    proto: tcp
+- name: Reload UFW (Ubuntu)
+  service:
+    name: ufw
+    state: restarted
